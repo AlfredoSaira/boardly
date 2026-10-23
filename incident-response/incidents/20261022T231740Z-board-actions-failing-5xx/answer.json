@@ -1,0 +1,9 @@
+{
+  "incident": "20261022T231740Z-board-actions-failing-5xx",
+  "root_cause": "COLUMN_LABELS in store.py used the key \"to_do\" while the column id is \"todo\", so every move into To Do raised a KeyError while writing the \"card moved\" log line and returned a 500.",
+  "fix": "backend/src/boardly_backend/store.py changed the COLUMN_LABELS key \"to_do\" to \"todo\"; backend/tests/unit/test_cards.py added test_move_card_to_every_column as a regression test.",
+  "tests": "uv run --directory backend --frozen pytest -q -> 17 passed (the new test failed with KeyError before the fix)",
+  "action": "fixed",
+  "summary": "Card moves into the To Do column returned 500 because of a mismatched column key in the move log label map; fixed the key and added a regression test.",
+  "last_line": "SUMMARY: Card moves into the To Do column returned 500 because of a mismatched column key in the move log label map; fixed the key and added a regression test."
+}

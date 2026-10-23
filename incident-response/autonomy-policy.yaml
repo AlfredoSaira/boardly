@@ -1,0 +1,46 @@
+# Human-readable statement of what the headless responder agent may do.
+# The actual enforcement lives in agent_runner.py (the --restricted,
+# --tools, --allowedTools, --disallowedTools, and --permission-mode flags
+# passed to `claude`) and in responder.py (redeploy and verification are
+# done by code, never by the model). If this file and the code ever
+# disagree, the code is what actually ran; update this file to match it.
+
+version: 1
+
+default: deny
+
+sandbox:
+  starting_point: "--restricted (no Bash/Edit/WebFetch until explicitly re-added)"
+  file_edits_confined_to:
+    - backend/src/**
+    - backend/tests/**
+  allowed_commands:
+    - "uv run --directory backend --frozen pytest -q"
+    - "incident-response/runbooks/verify-recovery.sh (no arguments; local backend only)"
+    - "git status / git diff / git log (read-only)"
+  explicitly_denied:
+    - "git commit / git push / git reset / git checkout"
+    - "docker (any subcommand) -- redeploying is the responder's job, not the model's"
+    - "WebFetch / WebSearch (excluded by --restricted, never re-added)"
+  on_unlisted_action: "denied automatically (--permission-mode dontAsk, --permission-prompts none); there is no human to ask in headless mode"
+  spend_cap: "--max-budget-usd (RESPONDER_MAX_BUDGET_USD, default 2)"
+  time_cap: "killed after RESPONDER_AGENT_TIMEOUT seconds (default 900)"
+
+rules:
+  - name: test-alert
+    when: "alert.labels.test == 'true'"
+    action: "no changes; answer ACTION: none"
+
+  - name: board-actions-failing
+    when: "alert.labels.alertname == 'Board actions failing (5xx)' and status == firing"
+    allowed_actions: [fix, escalate]
+    requires_before_fix_accepted:
+      - "regression test added under backend/tests/unit/ that fails without the fix"
+      - "uv run --directory backend --frozen pytest -q passes"
+    requires_after_fix:
+      - "responder rebuilds the backend container itself (runbooks/redeploy.sh)"
+      - "responder replays the full card journey itself (runbooks/verify-recovery.sh); the agent's own claim of 'fixed' is never trusted on its own"
+    never: "commit or push; a human reviews the diff first"
+
+  - name: anything_else
+    action: escalate

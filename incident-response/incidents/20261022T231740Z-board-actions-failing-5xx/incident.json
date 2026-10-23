@@ -1,0 +1,111 @@
+{
+  "id": "20261022T231740Z-board-actions-failing-5xx",
+  "status": "recovered",
+  "created_at": "2026-10-22T23:17:40.028957+00:00",
+  "alert": {
+    "status": "firing",
+    "labels": {
+      "alertname": "Board actions failing (5xx)",
+      "grafana_folder": "Boardly Alerts",
+      "service": "boardly-backend",
+      "severity": "critical"
+    },
+    "annotations": {
+      "summary": "Boardly: board API requests are failing with 5xx in the last 5 minutes, so users cannot save their changes. Dashboard: http://localhost:3000/d/boardly/boardly"
+    },
+    "startsAt": "2026-10-22T23:17:30Z",
+    "endsAt": "0001-01-01T00:00:00Z",
+    "generatorURL": "http://localhost:3000/alerting/grafana/boardly-card-actions-failing/view?orgId=1",
+    "fingerprint": "702a48a4a46e802e",
+    "silenceURL": "http://localhost:3000/alerting/silence/new?alertmanager=grafana&matcher=alertname%3DBoard+actions+failing+%285xx%29&matcher=grafana_folder%3DBoardly+Alerts&matcher=service%3Dboardly-backend&matcher=severity%3Dcritical&orgId=1",
+    "dashboardURL": "",
+    "panelURL": "",
+    "values": {
+      "A": 22.26987,
+      "C": 1
+    },
+    "valueString": "[ var='A' labels={} value=22.26987 ], [ var='C' labels={} value=1 ]"
+  },
+  "timeline": [
+    {
+      "at": "2026-10-22T23:17:40.029316+00:00",
+      "status": "received",
+      "note": "firing alert Board actions failing (5xx)"
+    },
+    {
+      "at": "2026-10-22T23:17:40.113968+00:00",
+      "status": "evidence_collected",
+      "note": "35 error logs, 5 error traces, failing routes: ['PATCH /cards/{card_id}/move']"
+    },
+    {
+      "at": "2026-10-22T23:17:40.114214+00:00",
+      "status": "agent_running",
+      "note": "claude --restricted, sandboxed to backend/src/ and backend/tests/"
+    },
+    {
+      "at": "2026-10-22T23:18:16.626899+00:00",
+      "status": "agent_done",
+      "note": "action=fixed exit=0"
+    },
+    {
+      "at": "2026-10-22T23:18:16.627215+00:00",
+      "status": "redeploying",
+      "note": "rebuilding the backend container with the agent's fix"
+    },
+    {
+      "at": "2026-10-22T23:18:26.124540+00:00",
+      "status": "recovered",
+      "note": "verify-recovery.sh passed; fix awaits human review before commit"
+    }
+  ],
+  "agent": {
+    "command": [
+      "claude",
+      "-p",
+      "--restricted",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--permission-mode",
+      "dontAsk",
+      "--permission-prompts",
+      "none",
+      "--strict-mcp-config",
+      "--max-budget-usd",
+      "2",
+      "--tools",
+      "Read,Grep,Glob,Edit,Bash",
+      "--allowedTools",
+      "Edit(./backend/src/**)",
+      "Edit(./backend/tests/**)",
+      "Bash(uv run --directory backend --frozen pytest:*)",
+      "Bash(incident-response/runbooks/verify-recovery.sh)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "--disallowedTools",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(docker:*)"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "duration_s": 36.5,
+    "model": "claude-opus-5-5",
+    "permission_mode": "dontAsk",
+    "tools": [
+      "Bash",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Read"
+    ],
+    "num_turns": 11,
+    "cost_usd": 0.1446522,
+    "is_error": false,
+    "permission_denials": [],
+    "last_line": "SUMMARY: Card moves into the To Do column returned 500 because of a mismatched column key in the move log label map; fixed the key and added a regression test."
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "receiver": "incident-responder",
+  "status": "firing",
+  "alerts": [
+    {
+      "status": "firing",
+      "labels": {
+        "alertname": "Board actions failing (5xx)",
+        "grafana_folder": "Boardly Alerts",
+        "service": "boardly-backend",
+        "severity": "critical"
+      },
+      "annotations": {
+        "summary": "Boardly: board API requests are failing with 5xx in the last 5 minutes, so users cannot save their changes. Dashboard: http://localhost:3000/d/boardly/boardly"
+      },
+      "startsAt": "2026-10-22T23:17:30Z",
+      "endsAt": "0001-01-01T00:00:00Z",
+      "generatorURL": "http://localhost:3000/alerting/grafana/boardly-card-actions-failing/view?orgId=1",
+      "fingerprint": "702a48a4a46e802e",
+      "silenceURL": "http://localhost:3000/alerting/silence/new?alertmanager=grafana&matcher=alertname%3DBoard+actions+failing+%285xx%29&matcher=grafana_folder%3DBoardly+Alerts&matcher=service%3Dboardly-backend&matcher=severity%3Dcritical&orgId=1",
+      "dashboardURL": "",
+      "panelURL": "",
+      "values": {
+        "A": 22.26987,
+        "C": 1
+      },
+      "valueString": "[ var='A' labels={} value=22.26987 ], [ var='C' labels={} value=1 ]"
+    }
+  ],
+  "groupLabels": {
+    "alertname": "Board actions failing (5xx)"
+  },
+  "commonLabels": {
+    "alertname": "Board actions failing (5xx)",
+    "grafana_folder": "Boardly Alerts",
+    "service": "boardly-backend",
+    "severity": "critical"
+  },
+  "commonAnnotations": {
+    "summary": "Boardly: board API requests are failing with 5xx in the last 5 minutes, so users cannot save their changes. Dashboard: http://localhost:3000/d/boardly/boardly"
+  },
+  "externalURL": "http://localhost:3000/",
+  "version": "1",
+  "groupKey": "{}:{alertname=\"Board actions failing (5xx)\"}",
+  "truncatedAlerts": 0,
+  "orgId": 1,
+  "title": "[FIRING:1] Board actions failing (5xx) (Boardly Alerts boardly-backend critical)",
+  "state": "alerting",
+  "message": "**Firing**\n\nValue: A=22.26987, C=1\nLabels:\n - alertname = Board actions failing (5xx)\n - grafana_folder = Boardly Alerts\n - service = boardly-backend\n - severity = critical\nAnnotations:\n - summary = Boardly: board API requests are failing with 5xx in the last 5 minutes, so users cannot save their changes. Dashboard: http://localhost:3000/d/boardly/boardly\nSource: http://localhost:3000/alerting/grafana/boardly-card-actions-failing/view?orgId=1\nSilence: http://localhost:3000/alerting/silence/new?alertmanager=grafana&matcher=alertname%3DBoard+actions+failing+%285xx%29&matcher=grafana_folder%3DBoardly+Alerts&matcher=service%3Dboardly-backend&matcher=severity%3Dcritical&orgId=1\n"
+}
