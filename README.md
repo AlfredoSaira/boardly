@@ -54,6 +54,7 @@ browser -> frontend (React + Vite, served by nginx) -/api-> backend (FastAPI) ->
 |---|---|
 | Spec and task tracker | [`_docs/specs.md`](_docs/specs.md), [GitHub issues](https://github.com/AlfredoSaira/boardly/issues) |
 | Agent team and process | [`docs/agent-team.md`](docs/agent-team.md), [`docs/process.md`](docs/process.md) |
+| How AI was used (context, delegation, review, verification) | [`docs/ai-usage.md`](docs/ai-usage.md) |
 | Agent instructions | [`AGENTS.md`](AGENTS.md) -> modular [`docs/`](docs/) |
 | Architecture | [`docs/architecture.md`](docs/architecture.md) |
 | Tests (unit, integration, frontend, smoke) | [`docs/testing.md`](docs/testing.md) |
@@ -76,7 +77,7 @@ Grafana · Claude Code (subagents, skills, hooks, MCP) for development and on-ca
 |---|---|
 | Problem description | this README |
 | Product specification | [`_docs/specs.md`](_docs/specs.md) + [issues with acceptance criteria](https://github.com/AlfredoSaira/boardly/issues?q=is%3Aissue) referenced by commits |
-| Agent team | [`docs/agent-team.md`](docs/agent-team.md), [`.claude/agents/`](.claude/agents/), [`incident-response/`](incident-response/) |
+| Agent team | [`docs/agent-team.md`](docs/agent-team.md), [`docs/ai-usage.md`](docs/ai-usage.md), [`.claude/agents/`](.claude/agents/), [`incident-response/`](incident-response/) |
 | Context management | [`AGENTS.md`](AGENTS.md) -> [`docs/`](docs/) |
 | Application | `docker compose up -d --build --wait` -> http://localhost:8080 (React -> FastAPI -> Postgres) |
 | Testing | `make test`: backend unit + integration (real server, Postgres in CI), frontend, responder, MCP, hooks |

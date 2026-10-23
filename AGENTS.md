@@ -12,6 +12,7 @@ incidents from alerts.
 | What we build (source of truth for scope) | [`_docs/specs.md`](_docs/specs.md) |
 | How work flows from issue to production | [`docs/process.md`](docs/process.md) |
 | Who does what (humans, agents, subagents) | [`docs/agent-team.md`](docs/agent-team.md) |
+| How AI was used and verified on this project | [`docs/ai-usage.md`](docs/ai-usage.md) |
 | Code layout and request path | [`docs/architecture.md`](docs/architecture.md) |
 | Where each kind of test lives | [`docs/testing.md`](docs/testing.md) |
 | Docker, Kubernetes, CI/CD, rollback | [`docs/deployment.md`](docs/deployment.md) |
