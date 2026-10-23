@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "boardly": {
+      "command": "uv",
+      "args": ["run", "--project", "mcp-server", "--quiet", "python", "mcp-server/server.py"],
+      "env": {
+        "BOARDLY_URL": "${BOARDLY_URL:-http://localhost:8080}",
+        "RESPONDER_URL": "${RESPONDER_URL:-http://localhost:8001}"
+      }
+    }
+  }
+}
