@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2 # no local state; both replicas share Postgres
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: boardly-backend:local # replaced by the CD pipeline with the commit's tag
+          imagePullPolicy: IfNotPresent # loaded into kind with "kind load", never pulled
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: boardly-db
+                  key: DATABASE_URL
+            - name: APP_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { memory: 256Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8000
