@@ -1,0 +1,23 @@
+namespace/boardly-dev unchanged
+persistentvolumeclaim/postgres-data unchanged
+deployment.apps/postgres unchanged
+service/postgres unchanged
+deployment "postgres" successfully rolled out
+deployment.apps/backend configured
+service/backend unchanged
+deployment.apps/frontend configured
+service/frontend unchanged
+Waiting for deployment "backend" rollout to finish: 1 out of 2 new replicas have been updated...
+error: timed out waiting for the condition
+::error::backend rollout did not become healthy -- rolling back boardly-dev to the previous version
+Warning: resource deployments/backend was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/backend rolled back
+Warning: resource deployments/frontend was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/frontend rolled back
+deployment "backend" successfully rolled out
+Waiting for deployment "frontend" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "frontend" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "frontend" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "frontend" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "frontend" rollout to finish: 1 old replicas are pending termination...
+deployment "frontend" successfully rolled out

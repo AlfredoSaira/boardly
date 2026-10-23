@@ -1,0 +1,26 @@
+namespace/boardly-dev created
+secret/boardly-db created
+persistentvolumeclaim/postgres-data created
+deployment.apps/postgres created
+service/postgres created
+Waiting for deployment "postgres" rollout to finish: 0 of 1 updated replicas are available...
+deployment "postgres" successfully rolled out
+deployment.apps/backend created
+service/backend created
+deployment.apps/frontend created
+service/frontend created
+Waiting for deployment "backend" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "backend" rollout to finish: 1 of 2 updated replicas are available...
+deployment "backend" successfully rolled out
+deployment "frontend" successfully rolled out
+frontend page: ok
+GET /api/board: ok
+POST /api/cards: ok (33bc345b-90cb-4666-b484-d94113af9d55)
+PATCH move: ok
+DELETE: ok
+SMOKE TEST PASSED
+Deployed boardly:v1 to boardly-dev
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                SELECTOR
+backend    2/2     2            2           8s    backend      boardly-backend:v1    app=backend
+frontend   2/2     2            2           8s    frontend     boardly-frontend:v1   app=frontend
+postgres   1/1     1            1           13s   postgres     postgres:17-alpine    app=postgres
