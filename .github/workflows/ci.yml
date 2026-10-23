@@ -1,0 +1,143 @@
+name: CI/CD
+
+# Pull requests: tests only.
+# Push to main: tests -> build images -> deploy to dev (automatic)
+#               -> deploy to prod (manual approval on the "production" environment).
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: boardly
+          POSTGRES_PASSWORD: boardly
+          POSTGRES_DB: boardly
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U boardly -d boardly"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Unit tests (in-process, SQLite in memory)
+        run: uv run pytest -q tests/unit
+      - name: Integration tests (real uvicorn server over HTTP, Postgres)
+        run: uv run pytest -q tests/integration
+        env:
+          INTEGRATION_DATABASE_URL: postgresql+psycopg://boardly:boardly@localhost:5432/boardly
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  agents:
+    # The on-call responder, the MCP server and the agent guardrail hooks.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: On-call responder tests
+        working-directory: incident-response
+        run: uv sync --frozen && uv run --frozen pytest -q
+      - name: MCP server tests
+        working-directory: mcp-server
+        run: uv sync --frozen && uv run --frozen pytest -q test_server.py
+      - name: Guardrail hook tests
+        working-directory: backend
+        run: uv sync --frozen && uv run python -m pytest -q -p no:cacheprovider ../agent-hooks/tests
+
+  build:
+    if: github.event_name != 'pull_request'
+    needs: [backend, frontend, agents]
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: tag
+        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+      - name: Build images
+        run: |
+          docker build -t "boardly-backend:${{ steps.tag.outputs.tag }}" backend
+          docker build -t "boardly-frontend:${{ steps.tag.outputs.tag }}" frontend
+      - name: Save images (no registry needed; deploy jobs load them into kind)
+        run: |
+          docker save "boardly-backend:${{ steps.tag.outputs.tag }}" "boardly-frontend:${{ steps.tag.outputs.tag }}" \
+            -o /tmp/boardly-images.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boardly-images
+          path: /tmp/boardly-images.tar
+          retention-days: 7
+
+  deploy-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: boardly-images
+          path: /tmp
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: boardly
+      - name: Load images into the cluster
+        run: |
+          docker load -i /tmp/boardly-images.tar
+          kind load docker-image "boardly-backend:${{ needs.build.outputs.tag }}" "boardly-frontend:${{ needs.build.outputs.tag }}" --name boardly
+      - name: Deploy to dev (rolls back automatically if rollout or smoke test fails)
+        run: scripts/deploy.sh dev "${{ needs.build.outputs.tag }}"
+
+  deploy-prod:
+    needs: [build, deploy-dev]
+    runs-on: ubuntu-latest
+    # The "production" environment requires a manual approval in GitHub
+    # (Settings -> Environments -> production -> Required reviewers).
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: boardly-images
+          path: /tmp
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: boardly
+      - name: Load images into the cluster
+        run: |
+          docker load -i /tmp/boardly-images.tar
+          kind load docker-image "boardly-backend:${{ needs.build.outputs.tag }}" "boardly-frontend:${{ needs.build.outputs.tag }}" --name boardly
+      - name: Deploy to prod (rolls back automatically if rollout or smoke test fails)
+        run: scripts/deploy.sh prod "${{ needs.build.outputs.tag }}"
