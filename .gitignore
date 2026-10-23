@@ -1,0 +1,19 @@
+# Python / backend
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+*.db
+*.sqlite3
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Agent hooks
+agent-hooks/logs/
+agent-hooks/.contract-reviewed

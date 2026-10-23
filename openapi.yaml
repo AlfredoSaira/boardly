@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: Boardly API
+  description: >
+    Backend contract for Boardly, a single-user mini kanban board with four
+    fixed columns (New / To Do / In Progress / Done). See _docs/specs.md
+    for the product spec this contract implements.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8000
+
+paths:
+  /board:
+    get:
+      summary: Get the whole board (columns + all cards)
+      operationId: getBoard
+      responses:
+        "200":
+          description: The board
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Board"
+
+  /cards:
+    post:
+      summary: Create a card
+      operationId: createCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardCreate"
+      responses:
+        "201":
+          description: The created card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+        "422":
+          description: Validation error (e.g. empty title)
+
+  /cards/{card_id}:
+    patch:
+      summary: Update a card's title and/or description
+      operationId: updateCard
+      parameters:
+        - $ref: "#/components/parameters/CardId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardUpdate"
+      responses:
+        "200":
+          description: The updated card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+        "404":
+          description: Card not found
+    delete:
+      summary: Delete a card
+      operationId: deleteCard
+      parameters:
+        - $ref: "#/components/parameters/CardId"
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Card not found
+
+  /cards/{card_id}/move:
+    patch:
+      summary: Move a card to a different column
+      operationId: moveCard
+      parameters:
+        - $ref: "#/components/parameters/CardId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardMove"
+      responses:
+        "200":
+          description: The updated card
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Card"
+        "404":
+          description: Card not found
+
+components:
+  parameters:
+    CardId:
+      name: card_id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    Column:
+      type: string
+      enum: [new, todo, in_progress, done]
+
+    Card:
+      type: object
+      required: [id, title, description, column]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        column:
+          $ref: "#/components/schemas/Column"
+
+    CardCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          default: ""
+        column:
+          $ref: "#/components/schemas/Column"
+          default: new
+
+    CardUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+
+    CardMove:
+      type: object
+      required: [column]
+      properties:
+        column:
+          $ref: "#/components/schemas/Column"
+
+    Board:
+      type: object
+      required: [columns, cards]
+      properties:
+        columns:
+          type: array
+          items:
+            type: object
+            required: [id, title]
+            properties:
+              id:
+                $ref: "#/components/schemas/Column"
+              title:
+                type: string
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/Card"
